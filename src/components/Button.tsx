@@ -2,12 +2,19 @@ import { ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode;
+  type?: "button" | "submit" | "reset";
+  onClick?: () => void;
+  className?: string;
 }
 
 const Button = (props: ButtonProps) => {
-  const { children } = props;
+  const { children, type, onClick, className } = props;
   return (
-    <button className="rounded-lg bg-blue-500 px-3 py-2 text-white font-semibold">
+    <button
+      type={type}
+      onClick={onClick}
+      className={`rounded-lg px-3 py-2 bg-blue-500 text-white font-semibold cursor-pointer ${className}`}
+    >
       {children}
     </button>
   );

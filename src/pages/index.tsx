@@ -1,12 +1,14 @@
 import Button from "@/components/Button";
 import Column from "@/components/Column";
+import ModalTask from "@/components/ModalTask";
 import { COLUMNS, INITIAL_TASKS } from "@/constants/Task.constant";
 import { ITask } from "@/types/Task";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 const App = () => {
   const [tasks, setTasks] = useState<ITask[]>([...INITIAL_TASKS]);
+  const [showModalAddTask, setShowModalAddTask] = useState(false);
 
   // Load tasks on initial render
   useEffect(() => {
@@ -29,8 +31,8 @@ const App = () => {
     const taskId = active.id as string;
     const newStatus = over.id as ITask["status"];
 
-    setTasks(() =>
-      tasks.map((task) =>
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
         task.id === taskId
           ? {
               ...task,
@@ -40,13 +42,30 @@ const App = () => {
       ),
     );
   };
+
+  const handleCreateTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    const newTask: ITask = {
+      id: String(tasks.length + 1),
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      status: "TODO",
+    };
+
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+    event.currentTarget.reset();
+    setShowModalAddTask(false);
+  };
+
   return (
-    <main className="min-h-screen p-4">
+    <main className="min-h-screen p-4 flex flex-col">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-neutral-700">Task Management</h1>
-        <Button>Add Task</Button>
+        <Button onClick={() => setShowModalAddTask(true)}>Add Task</Button>
       </div>
-      <div className="flex gap-8">
+      <div className="flex gap-8 flex-1">
         <DndContext onDragEnd={handleDragEnd}>
           {COLUMNS.map((column) => (
             <Column
@@ -57,6 +76,12 @@ const App = () => {
           ))}
         </DndContext>
       </div>
+      {showModalAddTask && (
+        <ModalTask
+          onCancel={() => setShowModalAddTask(false)}
+          onSubmit={handleCreateTask}
+        />
+      )}
     </main>
   );
 };
