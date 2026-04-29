@@ -9,6 +9,10 @@ import { FormEvent, useEffect, useState } from "react";
 const App = () => {
   const [tasks, setTasks] = useState<ITask[]>([...INITIAL_TASKS]);
   const [showModalAddTask, setShowModalAddTask] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<{
+    activity: string;
+    task: ITask;
+  } | null>(null);
 
   // Load tasks on initial render
   useEffect(() => {
@@ -48,7 +52,7 @@ const App = () => {
     const formData = new FormData(event.currentTarget);
 
     const newTask: ITask = {
-      id: String(tasks.length + 1),
+      id: Math.random().toString(36).substring(2, 9),
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       status: "TODO",
@@ -57,6 +61,26 @@ const App = () => {
     setTasks((prevTasks) => [...prevTasks, newTask]);
     event.currentTarget.reset();
     setShowModalAddTask(false);
+  };
+  const handleUpdateTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    const updatedTask: ITask = {
+      id: selectedTask?.task?.id as string,
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      status: selectedTask?.task?.status as ITask["status"],
+    };
+
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task,
+      ),
+    );
+
+    event.currentTarget.reset();
+    setSelectedTask(null);
   };
 
   return (
@@ -72,6 +96,7 @@ const App = () => {
               key={column.id}
               column={column}
               tasks={tasks.filter((task) => task.status === column.id)}
+              setSelectedTask={setSelectedTask}
             />
           ))}
         </DndContext>
@@ -80,6 +105,14 @@ const App = () => {
         <ModalTask
           onCancel={() => setShowModalAddTask(false)}
           onSubmit={handleCreateTask}
+        />
+      )}
+      {selectedTask?.activity === "update" && (
+        <ModalTask
+          onSubmit={handleUpdateTask}
+          onCancel={() => setSelectedTask(null)}
+          selectedTask={selectedTask.task}
+          type="Update"
         />
       )}
     </main>
