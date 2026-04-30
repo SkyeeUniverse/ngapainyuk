@@ -41,14 +41,10 @@ const ModalTask = (props: ModalTaskProps) => {
             />
           </label>
           <div className="flex w-full items-center justify-end gap-2">
-            <Button type="button" onClick={onCancel} className="bg-neutral-500">
+            <Button onClick={onCancel} className="bg-neutral-500">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              onCLick={() => onSubmit}
-              className="bg-blue-500"
-            >
+            <Button type="submit" className="bg-blue-500">
               {type} Task
             </Button>
           </div>
